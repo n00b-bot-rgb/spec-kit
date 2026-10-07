@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "synthetic": true,
+  "records": [
+    {
+      "record_id": "rec_489c056074315c48",
+      "case_id": "demo-alpha",
+      "run_id": "run_alpha_partial",
+      "source_id": "synthetic-publisher",
+      "source_url": "https://example.org/synthetic/report-001",
+      "route": "publisher_bulk_export",
+      "identifier": "REPORT-001",
+      "retrieved_at": "2026-01-01T12:00:00Z",
+      "jurisdiction": {"county": null, "county_status": "not_applicable"},
+      "content_sha256": "64d45290829baac33c7adb525cb23fe299b564a01b14d0f33e05551722f026c2",
+      "raw_artifact": "raw/publisher-report.txt",
+      "title": "Synthetic methodology report",
+      "summary": "Fictional evidence for dashboard and importer tests.",
+      "review_status": "unreviewed",
+      "tags": ["synthetic", "report"]
+    },
+    {
+      "record_id": "rec_adff6a1b1ffbfd7a",
+      "case_id": "demo-alpha",
+      "run_id": "run_alpha_partial",
+      "source_id": "synthetic-publisher",
+      "source_url": "https://example.org/synthetic/notice-002",
+      "route": "publisher_bulk_export",
+      "identifier": "NOTICE-002",
+      "retrieved_at": "2026-01-01T12:01:00Z",
+      "jurisdiction": {"county": null, "county_status": "unknown"},
+      "content_sha256": "b75d636e55f63a1be2ad65d4d93377d670f08582adac146ab15fcd2c89aff1af",
+      "raw_artifact": "raw/dataset-notice.txt",
+      "title": "Synthetic dataset revision notice",
+      "summary": "A second fictional record; jurisdiction has not been resolved.",
+      "review_status": "unreviewed",
+      "tags": ["synthetic", "notice"]
+    },
+    {
+      "record_id": "rec_2e8f7634e325b4d0",
+      "case_id": "demo-beta",
+      "run_id": "run_beta_success",
+      "source_id": "synthetic-publisher",
+      "source_url": "https://example.org/synthetic/report-001",
+      "route": "publisher_bulk_export",
+      "identifier": "REPORT-001",
+      "retrieved_at": "2026-01-01T12:02:00Z",
+      "jurisdiction": {"county": null, "county_status": "not_applicable"},
+      "content_sha256": "64d45290829baac33c7adb525cb23fe299b564a01b14d0f33e05551722f026c2",
+      "raw_artifact": "raw/publisher-report.txt",
+      "title": "Synthetic report in a separate case",
+      "summary": "The same source content is kept separate by case identity.",
+      "review_status": "unreviewed",
+      "tags": ["synthetic", "report"]
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run_alpha_partial",
+      "case_id": "demo-alpha",
+      "source_id": "synthetic-publisher",
+      "status": "partial",
+      "started_at": "2026-01-01T12:00:00Z",
+      "finished_at": "2026-01-01T12:01:30Z",
+      "attempted_count": 3,
+      "accepted_count": 2,
+      "rejected_count": 1,
+      "failure_reason": "Synthetic third item lacked a required provenance field."
+    },
+    {
+      "run_id": "run_beta_success",
+      "case_id": "demo-beta",
+      "source_id": "synthetic-publisher",
+      "status": "succeeded",
+      "started_at": "2026-01-01T12:02:00Z",
+      "finished_at": "2026-01-01T12:02:30Z",
+      "attempted_count": 1,
+      "accepted_count": 1,
+      "rejected_count": 0,
+      "failure_reason": null
+    },
+    {
+      "run_id": "run_alpha_failed",
+      "case_id": "demo-alpha",
+      "source_id": "synthetic-publisher",
+      "status": "failed",
+      "started_at": "2026-01-01T12:03:00Z",
+      "finished_at": "2026-01-01T12:03:30Z",
+      "attempted_count": 1,
+      "accepted_count": 0,
+      "rejected_count": 1,
+      "failure_reason": "Synthetic artifact checksum did not match; no evidence accepted."
+    }
+  ]
+}

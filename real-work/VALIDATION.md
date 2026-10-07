@@ -1,10 +1,26 @@
 # Workspace Validation
 
 Validation was performed on 2026-10-07 in the Computer sandbox. These results
-cover the configured scaffold and selected upstream behavior, not an application
-feature or a live Claude session.
+cover the configured workspace, feature scaffolds, and selected upstream behavior,
+not implemented application features or a live Claude session.
 
-## Checks and results
+## Research-feature scaffold revision
+
+- A dedicated workspace virtualenv was created and `requirements-dev.txt` was
+  installed successfully.
+- The workspace validator and offline evidence validator both passed.
+- The workspace unittest suite now has 37 passing tests: 9 workspace tests and
+  28 evidence-contract/feature-selector tests.
+- The 56 focused upstream tests listed below were rerun and passed.
+- Both dashboard and pipeline feature selections passed
+  `.specify/scripts/bash/check-prerequisites.sh --json --require-spec
+  --require-tasks --include-tasks`.
+- The dashboard was left as the selected local feature. Its pointer is gitignored.
+- The UI, persistence importer, live collector, and complete agent workflow
+  remain unimplemented/unexecuted. The total is 93 focused passing tests, not
+  application end-to-end coverage.
+
+## Original workspace checks
 
 - `python3 scripts/verify_workspace.py`: passed workspace inventory,
   constitution, JSON, workflow source-path, hook-default, and skill checks.
