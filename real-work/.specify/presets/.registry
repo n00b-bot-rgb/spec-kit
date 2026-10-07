@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "presets": {
+    "constitution-sync": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:16599780bebfe3470d6a0c24ae6a6a19c91a77efe8d4c10ca25c739098d6656e",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.constitution"
+        ]
+      },
+      "registered_skills": {
+        "claude": [
+          "speckit-constitution"
+        ]
+      },
+      "installed_at": "2026-10-07T22:25:05.653942+00:00"
+    },
+    "lean": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:d316b3ad5f41988d51fe2b7faedab9c942edc68b44cf6970d5e26ef5a8522751",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.specify",
+          "speckit.plan",
+          "speckit.tasks",
+          "speckit.implement",
+          "speckit.constitution"
+        ]
+      },
+      "registered_skills": {
+        "claude": [
+          "speckit-specify",
+          "speckit-plan",
+          "speckit-tasks",
+          "speckit-implement",
+          "speckit-constitution"
+        ]
+      },
+      "installed_at": "2026-10-07T22:25:05.994215+00:00"
+    }
+  }
+}

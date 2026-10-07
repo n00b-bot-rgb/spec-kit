@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "workflows": {
+    "speckit": {
+      "name": "Full SDD Cycle",
+      "version": "1.0.1",
+      "description": "Runs specify \u2192 plan \u2192 tasks \u2192 implement with review gates",
+      "source": "../workflows/speckit",
+      "installed_at": "2026-10-07T22:25:03.591726+00:00",
+      "updated_at": "2026-10-07T22:25:07.682792+00:00"
+    },
+    "assess": {
+      "name": "Idea Assessment Pipeline",
+      "version": "1.0.0",
+      "description": "Runs intake \u2192 research \u2192 define \u2192 shape \u2192 decide with a verdict review gate before a manual /speckit.specify handoff",
+      "source": "../workflows/assess",
+      "installed_at": "2026-10-07T22:25:07.134099+00:00",
+      "updated_at": "2026-10-07T22:25:07.134111+00:00"
+    },
+    "bugfix": {
+      "name": "Guided Bug Fix",
+      "version": "1.0.0",
+      "description": "Runs bug assess \u2192 human review gate \u2192 bug fix \u2192 bug test on a bug report",
+      "source": "../workflows/bugfix",
+      "installed_at": "2026-10-07T22:25:07.438685+00:00",
+      "updated_at": "2026-10-07T22:25:07.438707+00:00"
+    }
+  }
+}

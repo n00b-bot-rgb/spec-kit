@@ -1,0 +1,1 @@
+../../../.specify/extensions/selftest/.specify-dev/agent-commands/claude/speckit-selftest-extension/SKILL.md

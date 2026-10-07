@@ -1,0 +1,1 @@
+../../../.specify/extensions/github/.specify-dev/agent-commands/claude/speckit-github-taskstoissues/SKILL.md

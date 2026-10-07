@@ -60,3 +60,19 @@ docs/dev
 .grok/
 .specify/
 specs/
+
+# This fork deliberately includes a reusable, configured working project.
+!real-work/.specify/
+!real-work/.specify/**
+!real-work/specs/
+!real-work/specs/**
+real-work/.specify/extensions/.cache/
+real-work/.specify/extensions/.backup/
+real-work/.specify/extensions/*/local-config.yml
+real-work/.specify/feature.json
+real-work/.specify/workflows/runs/
+real-work/.specify/**/*.lock
+real-work/**/__pycache__/
+real-work/**/*.py[cod]
+real-work/**/.env
+real-work/**/.env.*

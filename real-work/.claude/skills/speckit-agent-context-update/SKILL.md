@@ -1,0 +1,1 @@
+../../../.specify/extensions/agent-context/.specify-dev/agent-commands/claude/speckit-agent-context-update/SKILL.md

@@ -1,0 +1,1 @@
+../../../.specify/extensions/assess/.specify-dev/agent-commands/claude/speckit-assess-decide/SKILL.md

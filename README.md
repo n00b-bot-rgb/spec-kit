@@ -21,6 +21,13 @@ Spec Kit is an open source toolkit that gives AI coding agents structured
 processes, reusable templates, and documented outcomes. Start with one of the
 three processes below, customize it, or bring your own.
 
+## This fork's working project
+
+The [real-work workspace](real-work/README.md) contains a configured Claude
+integration, the installed extensions and workflows, and a starter constitution.
+The self-test and example scaffold presets are not active in that workspace.
+The upstream toolkit source and history remain intact.
+
 ## Choose your process
 
 | What you need | Process | Outcome |
