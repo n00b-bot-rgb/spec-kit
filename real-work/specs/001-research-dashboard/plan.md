@@ -28,6 +28,27 @@ operation. Do not fetch all cases and rely on client-side filtering as a securit
 boundary. A local fixture demo is not sufficient access control for production;
 authentication and authorization gate any private network deployment.
 
+## Deployment Candidate: Vercel Python Runtime
+
+Vercel is an unapproved candidate for a future hosted API milestone, not a
+deployment decision. Its Python runtime supports ASGI and WSGI applications,
+including FastAPI. If approved, the API would expose a top-level `app` handler
+through a supported Python entrypoint or a `tool.vercel.entrypoint` setting in
+`pyproject.toml`; Python dependencies and the supported interpreter version
+would also need to be explicit.
+
+Vercel routes requests to the function, and a frontend could be combined with
+the backend through Services if that deployment model is approved. Python
+bundles include files reachable at build time without automatic tree-shaking, so
+any eventual configuration should exclude unnecessary tests and static assets
+and keep runtime dependencies and the bundle within platform limits.
+
+This option does not change the fixture-first, local milestone. Before adding
+Vercel configuration or deploying, resolve Q-D1 and Q-D2, approve the framework,
+hosting mode, authentication boundary, and data classification, and confirm
+that only synthetic data is used unless private-data controls are separately
+approved. A successful platform build would not establish production readiness.
+
 ## Decisions
 
 - **Contract first:** Consume v1 evidence records and run manifests; do not
@@ -60,7 +81,10 @@ test tools. Existing shared contract checks are in `tests/test_feature_scaffolds
 
 Review the spec and Q-D1, implement the fixture repository, then implement list
 and detail views. Add collection-run states before wiring real pipeline results.
-Review Q-D2 before any non-local or non-synthetic deployment.
+Resolve Q-D2 before any non-local or non-synthetic deployment. If Vercel is
+approved, add and validate its Python function configuration as a separate
+deployment milestone; do not treat configuration validation as deployment
+authorization.
 
 ## Tests and Gates
 
@@ -70,6 +94,8 @@ Review Q-D2 before any non-local or non-synthetic deployment.
 - Gate: approve UI framework before dependency installation.
 - Gate: approve authentication and data handling before real research data.
 - Gate: approve an explicit destination before any public or remote deployment.
+- Gate: approve Vercel, the ASGI/WSGI entrypoint, Python version, and bundle
+  contents before adding platform-specific runtime configuration.
 
 ## Integration
 

@@ -91,9 +91,12 @@ These are proposed acceptance targets, not measured production results:
 ## Open Questions
 
 - **Q-D1, owner user, blocking before UI implementation:** Approve a proposed
-  local-only web UI and framework, or select a desktop/terminal alternative.
+  local-only web UI and framework, including whether to use a Python API
+  framework such as FastAPI, or select a desktop/terminal alternative.
 - **Q-D2, owner user, blocking before non-synthetic data:** Will this run only on
-  localhost or require a private authenticated deployment?
+  localhost or require a private authenticated deployment? Vercel's Python
+  runtime is a candidate only; the hosting destination and authentication
+  boundary remain unapproved.
 - **Q-D3, owner user, non-blocking for fixtures:** Which first real research case
   and source are authorized? No actual case data is included.
 
