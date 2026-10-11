@@ -123,7 +123,7 @@ class ContractTests(unittest.TestCase):
         for key in (
             "access_token", "ACCESS_TOKEN", "access-token", "client_secret",
             "CLIENT-SECRET", "Api_Key", "X-Api-Key", "refresh_token",
-            "id_token", "X-Amz-Signature", "sig",
+            "id_token", "X-Amz-Signature", "X-Amz-Security-Token", "sig",
         ):
             with self.subTest(key=key):
                 self.batch["records"][0]["source_url"] = (
@@ -154,7 +154,7 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(self.errors(), [])
 
     def test_invalid_url_ports_rejected(self):
-        for port in ("not-a-port", "-1", "65536", "0"):
+        for port in ("not-a-port", "-1", "65536", "0", ""):
             with self.subTest(port=port):
                 self.batch["records"][0]["source_url"] = (
                     f"https://example.org:{port}/report"
