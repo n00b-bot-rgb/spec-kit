@@ -24,7 +24,10 @@ class WorkspaceTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.parent = Path(self.temp.name)
         self.root = self.parent / "real-work"
-        shutil.copytree(ROOT, self.root, symlinks=True, ignore=shutil.ignore_patterns("__pycache__"))
+        shutil.copytree(
+            ROOT, self.root, symlinks=True,
+            ignore=shutil.ignore_patterns("__pycache__", ".venv"),
+        )
         shutil.copytree(ROOT.parent / "workflows", self.parent / "workflows")
 
     def errors(self):

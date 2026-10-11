@@ -2,7 +2,10 @@
 
 This is the working project inside the Spec Kit fork. It preserves the toolkit
 source at the repository root while keeping application specifications, code,
-and tests separate. No application feature has been selected or implemented yet.
+and tests separate. Research-dashboard and OSINT-pipeline features are scaffolded,
+but neither application feature is implemented yet.
+
+Read [START-HERE.md](START-HERE.md) for the feature-specific walkthrough.
 
 ## Setup
 
@@ -10,16 +13,20 @@ Use Python 3.11 or newer, Git, and uv. Install Claude Code separately if you wan
 to execute the generated coding-agent skills; installing Specify does not install
 or authenticate Claude Code.
 
-From a fresh checkout:
+For review of the unmerged scaffold, clone the published feature branch explicitly:
 
 ```bash
-git clone https://github.com/n00b-bot-rgb/spec-kit.git
+git clone --branch feat/research-dashboard-osint-pipeline --single-branch \
+  https://github.com/n00b-bot-rgb/spec-kit.git
 cd spec-kit
 uv tool install .
 export PATH="$(uv tool dir --bin):$PATH"
 cd real-work
+uv venv .venv
+uv pip install --python .venv/bin/python -r requirements-dev.txt
 python3 scripts/verify_workspace.py
-python3 -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
+uvx ruff@0.15.0 check scripts tests
 specify preset list
 specify extension list
 specify workflow list
@@ -29,6 +36,15 @@ If Specify is already installed and you intend to replace it with this checkout,
 use `uv tool install --force .` from the repository root. This replaces the
 existing Specify tool installation. The generated integration and installed
 packages are already committed; do not rerun `specify init --force`.
+
+`main` does not contain the feature-only files while PR #1 is unmerged. For an
+existing checkout, use the clean-tree fetch/checkout instructions in
+`START-HERE.md` rather than applying the original scaffold patch again.
+
+The dedicated `.github/workflows/workspace.yml` checks this workspace on
+relevant pull requests and pushes to `main` or the current feature branch, using
+Python 3.11 and 3.14 on Ubuntu. It runs lint, both validators, and the workspace
+unittest suite without enabling collectors or deploying an application.
 
 ## Installed components
 
@@ -52,7 +68,11 @@ invoked workflows or agent commands from performing actions; review their steps.
 ## Start real work
 
 Open Claude Code from `real-work/`, not the parent toolkit directory. Read the
-constitution and choose a focused feature before starting implementation.
+constitution and review the scaffolded feature before starting implementation.
+
+For the dashboard, run `python3 scripts/select_feature.py research-dashboard`;
+for the pipeline, use `python3 scripts/select_feature.py osint-data-pipeline`.
+The selector updates only the gitignored local feature pointer.
 
 1. Create a Git feature branch, for example `git switch -c feat/first-feature`.
 2. Run `/speckit-specify` with the feature description. Lean asks for a feature

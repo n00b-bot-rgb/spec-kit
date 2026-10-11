@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Research Evidence Batch v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "synthetic", "records", "runs"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "synthetic": {"type": "boolean"},
+    "records": {
+      "type": "array", "maxItems": 2000,
+      "items": {"$ref": "#/$defs/record"}
+    },
+    "runs": {
+      "type": "array", "maxItems": 2000,
+      "items": {"$ref": "#/$defs/run"}
+    }
+  },
+  "$defs": {
+    "safeId": {
+      "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$(?![\\s\\S])"
+    },
+    "utcTimestamp": {
+      "type": "string", "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$(?![\\s\\S])"
+    },
+    "route": {
+      "enum": [
+        "open_gis", "publisher_bulk_export", "documented_api",
+        "official_record", "records_request", "public_page"
+      ]
+    },
+    "jurisdiction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["county", "county_status"],
+      "properties": {
+        "county": {"type": ["string", "null"], "minLength": 1, "maxLength": 120},
+        "county_status": {"enum": ["known", "unknown", "not_applicable"]}
+      },
+      "allOf": [{
+        "if": {"properties": {"county_status": {"const": "known"}}},
+        "then": {"properties": {"county": {"type": "string"}}},
+        "else": {"properties": {"county": {"type": "null"}}}
+      }]
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id", "case_id", "run_id", "source_id", "source_url",
+        "route", "identifier", "retrieved_at", "jurisdiction",
+        "content_sha256", "raw_artifact", "title", "summary", "review_status", "tags"
+      ],
+      "properties": {
+        "record_id": {"type": "string", "pattern": "^rec_[a-f0-9]{16}$(?![\\s\\S])"},
+        "case_id": {"$ref": "#/$defs/safeId"},
+        "run_id": {"$ref": "#/$defs/safeId"},
+        "source_id": {"$ref": "#/$defs/safeId"},
+        "source_url": {
+          "type": "string", "format": "uri", "maxLength": 2048,
+          "pattern": "^https://[^/@\\s]+(?:/[^\\s]*)?$(?![\\s\\S])"
+        },
+        "route": {"$ref": "#/$defs/route"},
+        "identifier": {"type": "string", "minLength": 1, "maxLength": 256},
+        "retrieved_at": {"$ref": "#/$defs/utcTimestamp"},
+        "jurisdiction": {"$ref": "#/$defs/jurisdiction"},
+        "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$(?![\\s\\S])"},
+        "raw_artifact": {"type": "string", "pattern": "^raw/", "maxLength": 512},
+        "title": {"type": "string", "minLength": 1, "maxLength": 500},
+        "summary": {"type": "string", "maxLength": 5000},
+        "review_status": {"enum": ["unreviewed", "reviewed", "disputed"]},
+        "tags": {
+          "type": "array", "maxItems": 20, "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 64}
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id", "case_id", "source_id", "status", "started_at",
+        "finished_at", "attempted_count", "accepted_count",
+        "rejected_count", "failure_reason"
+      ],
+      "properties": {
+        "run_id": {"$ref": "#/$defs/safeId"},
+        "case_id": {"$ref": "#/$defs/safeId"},
+        "source_id": {"$ref": "#/$defs/safeId"},
+        "status": {"enum": ["queued", "running", "succeeded", "partial", "failed", "blocked"]},
+        "started_at": {
+          "anyOf": [{"$ref": "#/$defs/utcTimestamp"}, {"type": "null"}]
+        },
+        "finished_at": {
+          "anyOf": [{"$ref": "#/$defs/utcTimestamp"}, {"type": "null"}]
+        },
+        "attempted_count": {"type": "integer", "minimum": 0, "maximum": 2000},
+        "accepted_count": {"type": "integer", "minimum": 0, "maximum": 2000},
+        "rejected_count": {"type": "integer", "minimum": 0, "maximum": 2000},
+        "failure_reason": {"type": ["string", "null"], "minLength": 1, "maxLength": 500}
+      },
+      "allOf": [{
+        "if": {"properties": {"status": {"const": "queued"}}},
+        "then": {"properties": {"started_at": {"type": "null"}}},
+        "else": {"properties": {"started_at": {"$ref": "#/$defs/utcTimestamp"}}}
+      }]
+    }
+  }
+}
