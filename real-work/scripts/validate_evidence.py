@@ -21,6 +21,7 @@ SECRET_QUERY_KEYS = {
     "token", "key", "apikey", "xapikey", "auth", "authorization", "password",
     "secret", "accesstoken", "refreshtoken", "idtoken", "clientsecret",
     "credential", "credentials", "signature", "sig", "awsaccesskeyid",
+    "xamzsecuritytoken",
     "xamzcredential", "xamzsignature", "xgoogcredential", "xgoogsignature",
 }
 
@@ -90,7 +91,12 @@ def validate_batch(batch: dict, artifact_root: Path) -> list[str]:
         try:
             url = urlsplit(record["source_url"])
             port = url.port  # Raises ValueError for malformed/out-of-range ports.
-            if not url.hostname or url.scheme != "https" or (port is not None and port < 1):
+            if (
+                not url.hostname
+                or url.scheme != "https"
+                or url.netloc.endswith(":")
+                or (port is not None and port < 1)
+            ):
                 errors.append("Invalid HTTPS source URL")
             if url.username or url.password or any(
                 credential_parameter(key)
