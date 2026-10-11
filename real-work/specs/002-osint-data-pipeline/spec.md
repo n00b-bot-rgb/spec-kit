@@ -68,7 +68,9 @@ quality baseline has been measured.
 - **PIPE-006, P0, US3:** Emit a run manifest with status, counts, timestamps, and
   bounded diagnostic text. Counts must reconcile. Mixed valid/invalid input
   produces partial status; invalid input never becomes a success with a hidden
-  failure.
+  failure. Queued means unstarted and unprocessed: null start/end timestamps,
+  zero counts, no accepted records, and no failure reason. Other states require
+  a UTC start timestamp.
 - **PIPE-007, P0:** Keep live sources disabled until a source ID, route, access
   basis, scope, and limits are reviewed. Prefer publisher bulk exports/open GIS,
   then documented APIs, official records, records requests, and lastly public

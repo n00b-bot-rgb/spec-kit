@@ -61,7 +61,8 @@ error rate have not been measured, so this spec does not claim a baseline benefi
 - **DASH-005, P0, US3:** Display run status, attempted/accepted/rejected counts,
   start/end timestamps, and bounded diagnostic text. Given a partial run or a
   failed run with zero accepted records, then show that status rather than a
-  success or a conclusive absence finding.
+  success or a conclusive absence finding. Given a queued run with null start
+  time and zero counts, then show "Not started," not a fabricated start time.
 - **DASH-006, P0:** Handle loading, empty-case, filtered-empty, schema error, and
   service-unavailable states separately. Reject invalid contract payloads instead
   of rendering them as valid evidence.

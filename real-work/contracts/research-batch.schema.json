@@ -18,11 +18,11 @@
   },
   "$defs": {
     "safeId": {
-      "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+      "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$(?![\\s\\S])"
     },
     "utcTimestamp": {
       "type": "string", "format": "date-time",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$(?![\\s\\S])"
     },
     "route": {
       "enum": [
@@ -53,19 +53,19 @@
         "content_sha256", "raw_artifact", "title", "summary", "review_status", "tags"
       ],
       "properties": {
-        "record_id": {"type": "string", "pattern": "^rec_[a-f0-9]{16}$"},
+        "record_id": {"type": "string", "pattern": "^rec_[a-f0-9]{16}$(?![\\s\\S])"},
         "case_id": {"$ref": "#/$defs/safeId"},
         "run_id": {"$ref": "#/$defs/safeId"},
         "source_id": {"$ref": "#/$defs/safeId"},
         "source_url": {
           "type": "string", "format": "uri", "maxLength": 2048,
-          "pattern": "^https://[^/@\\s]+(?:/[^\\s]*)?$"
+          "pattern": "^https://[^/@\\s]+(?:/[^\\s]*)?$(?![\\s\\S])"
         },
         "route": {"$ref": "#/$defs/route"},
         "identifier": {"type": "string", "minLength": 1, "maxLength": 256},
         "retrieved_at": {"$ref": "#/$defs/utcTimestamp"},
         "jurisdiction": {"$ref": "#/$defs/jurisdiction"},
-        "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$(?![\\s\\S])"},
         "raw_artifact": {"type": "string", "pattern": "^raw/", "maxLength": 512},
         "title": {"type": "string", "minLength": 1, "maxLength": 500},
         "summary": {"type": "string", "maxLength": 5000},
@@ -89,7 +89,9 @@
         "case_id": {"$ref": "#/$defs/safeId"},
         "source_id": {"$ref": "#/$defs/safeId"},
         "status": {"enum": ["queued", "running", "succeeded", "partial", "failed", "blocked"]},
-        "started_at": {"$ref": "#/$defs/utcTimestamp"},
+        "started_at": {
+          "anyOf": [{"$ref": "#/$defs/utcTimestamp"}, {"type": "null"}]
+        },
         "finished_at": {
           "anyOf": [{"$ref": "#/$defs/utcTimestamp"}, {"type": "null"}]
         },
@@ -97,7 +99,12 @@
         "accepted_count": {"type": "integer", "minimum": 0, "maximum": 2000},
         "rejected_count": {"type": "integer", "minimum": 0, "maximum": 2000},
         "failure_reason": {"type": ["string", "null"], "minLength": 1, "maxLength": 500}
-      }
+      },
+      "allOf": [{
+        "if": {"properties": {"status": {"const": "queued"}}},
+        "then": {"properties": {"started_at": {"type": "null"}}},
+        "else": {"properties": {"started_at": {"$ref": "#/$defs/utcTimestamp"}}}
+      }]
     }
   }
 }

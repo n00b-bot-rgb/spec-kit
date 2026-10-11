@@ -119,6 +119,146 @@ class ContractTests(unittest.TestCase):
         self.assertIn("Credential-bearing source URL", errors)
         self.assertNotIn("never-print-this", " ".join(errors))
 
+    def test_credential_aliases_are_rejected_without_values(self):
+        for key in (
+            "access_token", "ACCESS_TOKEN", "access-token", "client_secret",
+            "CLIENT-SECRET", "Api_Key", "X-Api-Key", "refresh_token",
+            "id_token", "X-Amz-Signature", "sig",
+        ):
+            with self.subTest(key=key):
+                self.batch["records"][0]["source_url"] = (
+                    f"https://example.org/report?{key}=SYNTHETIC_SECRET_VALUE"
+                )
+                errors = self.errors()
+                self.assertIn("Credential-bearing source URL", errors)
+                self.assertNotIn("SYNTHETIC_SECRET_VALUE", " ".join(errors))
+
+    def test_encoded_credential_query_key_rejected(self):
+        self.batch["records"][0]["source_url"] = (
+            "https://example.org/report?access%5Ftoken=SYNTHETIC_SECRET_VALUE"
+        )
+        self.assertIn("Credential-bearing source URL", self.errors())
+
+    def test_fragment_credential_rejected_without_value(self):
+        self.batch["records"][0]["source_url"] = (
+            "https://example.org/report#access_token=SYNTHETIC_SECRET_VALUE"
+        )
+        errors = self.errors()
+        self.assertIn("Credential-bearing source URL", errors)
+        self.assertNotIn("SYNTHETIC_SECRET_VALUE", " ".join(errors))
+
+    def test_noncredential_query_and_anchor_allowed(self):
+        self.batch["records"][0]["source_url"] = (
+            "https://example.org/report?record_id=REPORT-001&page=1#methods"
+        )
+        self.assertEqual(self.errors(), [])
+
+    def test_invalid_url_ports_rejected(self):
+        for port in ("not-a-port", "-1", "65536", "0"):
+            with self.subTest(port=port):
+                self.batch["records"][0]["source_url"] = (
+                    f"https://example.org:{port}/report"
+                )
+                self.assertIn("Invalid HTTPS source URL", self.errors())
+
+    def test_valid_explicit_url_ports_allowed(self):
+        for port in ("443", "8443"):
+            with self.subTest(port=port):
+                self.batch["records"][0]["source_url"] = (
+                    f"https://example.org:{port}/report"
+                )
+                self.assertEqual(self.errors(), [])
+
+    def test_safe_id_control_characters_rejected(self):
+        schema = json.loads((ROOT / "contracts/research-batch.schema.json").read_text())
+        validator = Draft202012Validator(schema["$defs"]["safeId"])
+        for value in ("demo-alpha\n", "demo-alpha\r", "demo-alpha\t", "demo-alpha\0"):
+            with self.subTest(value=repr(value)):
+                self.assertFalse(validator.is_valid(value))
+
+    def test_newline_case_id_rejected_with_consistent_references(self):
+        for record in self.batch["records"]:
+            if record["case_id"] == "demo-alpha":
+                record["case_id"] += "\n"
+                record["record_id"] = evidence.record_id(
+                    record["case_id"], record["source_id"],
+                    record["identifier"], record["content_sha256"],
+                )
+        for run in self.batch["runs"]:
+            if run["case_id"] == "demo-alpha":
+                run["case_id"] += "\n"
+        self.assertTrue(any("pattern" in error for error in self.errors()))
+
+    def test_full_string_patterns_reject_trailing_newline(self):
+        schema = json.loads((ROOT / "contracts/research-batch.schema.json").read_text())
+        fields = schema["$defs"]["record"]["properties"]
+        checks = (
+            ("record_id", fields["record_id"], SAMPLE["records"][0]["record_id"]),
+            ("checksum", fields["content_sha256"], SAMPLE["records"][0]["content_sha256"]),
+            ("url", fields["source_url"], "https://example.org/report"),
+            ("timestamp", schema["$defs"]["utcTimestamp"], "2026-01-01T12:00:00Z"),
+        )
+        for label, field_schema, valid_value in checks:
+            with self.subTest(field=label):
+                validator = Draft202012Validator(field_schema)
+                self.assertTrue(validator.is_valid(valid_value))
+                self.assertFalse(validator.is_valid(valid_value + "\n"))
+
+    def make_queued_run(self):
+        run = self.batch["runs"][0]
+        self.batch["records"] = [
+            record for record in self.batch["records"]
+            if record["run_id"] != run["run_id"]
+        ]
+        run.update(
+            status="queued", started_at=None, finished_at=None,
+            attempted_count=0, accepted_count=0, rejected_count=0,
+            failure_reason=None,
+        )
+        return run
+
+    def test_legacy_queued_run_with_completed_records_rejected(self):
+        self.batch["runs"][0].update(status="queued", finished_at=None)
+        self.assertTrue(self.errors())
+
+    def test_unstarted_empty_queued_run_allowed(self):
+        self.make_queued_run()
+        self.assertEqual(self.errors(), [])
+
+    def test_queued_run_with_start_timestamp_rejected(self):
+        run = self.make_queued_run()
+        run["started_at"] = "2026-01-01T12:00:00Z"
+        self.assertTrue(self.errors())
+
+    def test_queued_run_with_processed_evidence_rejected(self):
+        run = self.make_queued_run()
+        self.batch["records"].append(copy.deepcopy(SAMPLE["records"][0]))
+        run.update(attempted_count=1, accepted_count=1)
+        self.assertIn("Queued run must be unprocessed and have no failure", self.errors())
+
+    def test_queued_run_with_failure_reason_rejected(self):
+        run = self.make_queued_run()
+        run["failure_reason"] = "Synthetic error"
+        self.assertIn("Queued run must be unprocessed and have no failure", self.errors())
+
+    def test_running_run_can_report_progress(self):
+        self.batch["runs"][0].update(status="running", finished_at=None)
+        self.assertEqual(self.errors(), [])
+
+    def test_running_run_requires_start_timestamp(self):
+        self.batch["runs"][0].update(
+            status="running", started_at=None, finished_at=None,
+        )
+        self.assertTrue(self.errors())
+
+    def test_terminal_run_requires_finish_timestamp(self):
+        self.batch["runs"][0]["finished_at"] = None
+        self.assertIn("Run lifecycle timestamps do not match status", self.errors())
+
+    def test_terminal_run_cannot_finish_before_start(self):
+        self.batch["runs"][0]["finished_at"] = "2025-12-31T12:00:00Z"
+        self.assertIn("Run finished before it started", self.errors())
+
     def test_ids_are_case_scoped(self):
         first, third = self.batch["records"][0], self.batch["records"][2]
         self.assertEqual(first["content_sha256"], third["content_sha256"])

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from collections import Counter
 from datetime import datetime
 from pathlib import Path, PurePosixPath
@@ -16,7 +17,18 @@ from jsonschema import Draft202012Validator, FormatChecker
 ROOT = Path(__file__).resolve().parents[1]
 MAX_BATCH_BYTES = 10 * 1024 * 1024
 MAX_ARTIFACT_BYTES = 1024 * 1024
-SECRET_QUERY_KEYS = {"token", "key", "apikey", "api_key", "auth", "authorization", "password", "secret"}
+SECRET_QUERY_KEYS = {
+    "token", "key", "apikey", "xapikey", "auth", "authorization", "password",
+    "secret", "accesstoken", "refreshtoken", "idtoken", "clientsecret",
+    "credential", "credentials", "signature", "sig", "awsaccesskeyid",
+    "xamzcredential", "xamzsignature", "xgoogcredential", "xgoogsignature",
+}
+
+
+def credential_parameter(key: str) -> bool:
+    """Normalize common key spellings without retaining or printing their values."""
+    normalized = re.sub(r"[\s_-]+", "", key).casefold()
+    return normalized in SECRET_QUERY_KEYS
 
 
 def record_id(case_id: str, source_id: str, identifier: str, checksum: str) -> str:
@@ -45,7 +57,7 @@ def validate_batch(batch: dict, artifact_root: Path) -> list[str]:
     if errors:
         return errors
     timestamps = [record["retrieved_at"] for record in batch["records"]]
-    timestamps += [run["started_at"] for run in batch["runs"]]
+    timestamps += [run["started_at"] for run in batch["runs"] if run["started_at"] is not None]
     timestamps += [run["finished_at"] for run in batch["runs"] if run["finished_at"] is not None]
     for timestamp in timestamps:
         try:
@@ -77,11 +89,13 @@ def validate_batch(batch: dict, artifact_root: Path) -> list[str]:
         counts[record["run_id"]] += 1
         try:
             url = urlsplit(record["source_url"])
-            if not url.hostname or url.scheme != "https":
+            port = url.port  # Raises ValueError for malformed/out-of-range ports.
+            if not url.hostname or url.scheme != "https" or (port is not None and port < 1):
                 errors.append("Invalid HTTPS source URL")
             if url.username or url.password or any(
-                key.lower() in SECRET_QUERY_KEYS
-                for key in parse_qs(url.query, keep_blank_values=True)
+                credential_parameter(key)
+                for parameters in (url.query, url.fragment)
+                for key in parse_qs(parameters, keep_blank_values=True)
             ):
                 errors.append("Credential-bearing source URL")
         except ValueError:
@@ -107,6 +121,10 @@ def validate_batch(batch: dict, artifact_root: Path) -> list[str]:
         accepted, rejected, attempted = (run[key] for key in ("accepted_count", "rejected_count", "attempted_count"))
         if accepted + rejected != attempted or counts[run["run_id"]] != accepted:
             errors.append("Run counts do not reconcile")
+        if run["status"] == "queued" and (
+            attempted or accepted or rejected or run["failure_reason"] is not None
+        ):
+            errors.append("Queued run must be unprocessed and have no failure")
         terminal = run["status"] not in ("queued", "running")
         if terminal != (run["finished_at"] is not None):
             errors.append("Run lifecycle timestamps do not match status")

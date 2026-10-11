@@ -7,27 +7,42 @@ with offline import. No UI, importer/store, or live collector is implemented yet
 
 ## Where the scaffold lives
 
-The local Git branch is `feat/research-dashboard-osint-pipeline`. These new
-changes are not on GitHub until you authorize a push of this branch. Commands
-below assume a checkout that already contains the scaffold.
+The scaffold is published on GitHub branch
+`feat/research-dashboard-osint-pipeline` and is under review in
+[pull request #1](https://github.com/n00b-bot-rgb/spec-kit/pull/1).
+While the PR is unmerged, use this branch rather than the default `main` branch.
 
-If you are using your own existing checkout, the attached
-`research-features-scaffold.patch` contains the complete scaffold, scripts,
-contract, fixtures, and tests. It was prepared against the previously pushed
-`8570186f` base. Apply it on a new branch only from a clean working tree:
+For a fresh checkout:
+
+```bash
+git clone --branch feat/research-dashboard-osint-pipeline --single-branch \
+  https://github.com/n00b-bot-rgb/spec-kit.git
+cd spec-kit
+```
+
+For an existing checkout with no local branch of that name:
 
 ```bash
 cd /path/to/spec-kit
 git status --short
-# Continue only if the working tree is clean and main contains the prior setup.
-git switch main
-git switch -c feat/research-dashboard-osint-pipeline
-git am /path/to/research-features-scaffold.patch
+# Continue only if the working tree is clean.
+git fetch origin
+git switch --track origin/feat/research-dashboard-osint-pipeline
 ```
 
-If the branch already exists, use the appropriate existing branch rather than
-recreating it. If `git am` reports conflicts, stop and inspect; `git am --abort`
-returns to the pre-apply state. Do not force-reset your existing work.
+If the local branch already exists and the working tree is clean:
+
+```bash
+git switch feat/research-dashboard-osint-pipeline
+git pull --ff-only origin feat/research-dashboard-osint-pipeline
+```
+
+Stop on divergence instead of force-resetting existing work. None of these
+checkout paths merges the feature branch into `main`.
+
+The earlier `research-features-scaffold.patch` is a historical copy of the
+initial scaffold; it does not include the follow-up fixes. Do not apply it on top
+of the published branch. The branch checkout is the current source of truth.
 
 ```text
 real-work/
@@ -66,6 +81,7 @@ uv pip install --python .venv/bin/python -r requirements-dev.txt
 python3 scripts/verify_workspace.py
 .venv/bin/python scripts/validate_evidence.py
 .venv/bin/python -m unittest discover -s tests -v
+uvx ruff@0.15.0 check scripts tests
 ```
 
 If Specify is already installed and you want to replace it with this checkout,
@@ -189,10 +205,14 @@ or enable live collection without approval for that specific action.
 
 ## Scaffold validation
 
-The workspace and evidence validators passed, along with 37 workspace/contract/
-selector tests and 56 focused upstream tests, for 93 passing focused tests.
-Both selected feature directories passed the installed prerequisite checker.
-The documented workspace virtualenv setup was exercised in the sandbox.
+The initial scaffold passed 37 workspace/contract/selector tests and 56 focused
+upstream tests. The follow-up adds regression and CI-wiring tests; consult
+`VALIDATION.md` for the latest local results and PR #1 for hosted checks.
+
+The dedicated workspace CI runs on relevant pull requests and pushes to `main`
+or the feature branch, using Python 3.11 and 3.14 on Ubuntu. It checks the new
+Python files, both validators, and the workspace tests rather than relying on
+the parent toolkit's test-discovery paths.
 
 These results verify the scaffold only. No UI, persistent importer, live source,
 Claude model execution, or full upstream test-suite run is claimed.
