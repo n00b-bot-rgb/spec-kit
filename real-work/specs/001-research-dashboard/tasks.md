@@ -1,7 +1,7 @@
 # Research Dashboard Tasks
 
 Status: Draft; uncompleted tasks are not authorization to execute.
-Dependencies: Q-D1 gates application stack; Q-D2 gates real/private data.
+Dependencies: Q-D1 gates application stack; Q-D2 gates hosting and real/private data.
 
 ## Setup
 
@@ -37,3 +37,8 @@ Dependencies: Q-D1 gates application stack; Q-D2 gates real/private data.
 - [ ] [D015] Check keyboard controls and the documented fixture performance budget in `tests/dashboard/`; record results in `specs/001-research-dashboard/validation.md`.
 - [ ] [D016] Resolve Q-D2 before implementing any real-data adapter in `src/dashboard/api/`.
 - [ ] [D017] Document run commands and actual limits in `specs/001-research-dashboard/quickstart.md`; do not claim production readiness.
+
+## Optional Deployment
+
+- [ ] [D018] Resolve Q-D1/Q-D2 and explicitly approve Vercel, hosting mode, authentication boundary, and synthetic-only data scope before adding deployment configuration.
+- [ ] [D019] If D018 is approved, configure the Python function entrypoint, supported Python version, runtime dependencies, and bundle exclusions; validate the Vercel build without claiming deployment approval.
